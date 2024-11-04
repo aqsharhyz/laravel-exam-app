@@ -24,9 +24,9 @@ class ExamPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user, Enroll $enroll): bool
+    public function viewAny(User $user, Exam $exam): bool
     {
-        return false; //!
+        return Enroll::where('user_id', $user->id)->where('lesson_id', $exam->lesson_id)->exists();
     }
 
     /**
@@ -34,7 +34,7 @@ class ExamPolicy
      */
     public function view(User $user, Exam $exam): bool
     {
-        return $user->enrolls->contains($exam->lesson_id);
+        return Enroll::where('user_id', $user->id)->where('lesson_id', $exam->lesson_id)->exists();
     }
 
     /**

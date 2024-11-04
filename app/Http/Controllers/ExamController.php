@@ -33,11 +33,12 @@ class ExamController extends Controller implements HasMiddleware
     /**
      * Display a listing of the resource.
      */
-    public function index($lessonId): View
+    public function index(Request $request, $lessonId): View
     {
         // $this->checkIfEnrolled($lessonId);
 
-        Gate::authorize('viewAny', Exam::class);
+        // dd(Enroll::findOrFail('enroll_id', $request->get('enrolled_id')));
+        Gate::authorize('viewAny', Exam::where('lesson_id', $lessonId)->first());
         $exams = Exam::where('lesson_id', $lessonId)->get();
         return view('exams.index', [
             'lessonId' => $lessonId,
@@ -59,25 +60,6 @@ class ExamController extends Controller implements HasMiddleware
                 'options' => [[new Option(), new Option()]],
                 'correct_option' => [-1],
             ]);
-            // return view('exams.edit', [
-            //     'exam' => new Exam(),
-            //     'lesson' => Lesson::findOrFail($lessonId),
-            //     'questions' => [['question_text' => 'das'], ['question_text' => 'daa']],
-            //     'options' => [
-            //         [
-            //             ['option_text' => 'dasd'],
-            //             ['option_text' => 'dasds'],
-            //             ['option_text' => 'dasds'],
-            //         ],
-            //         [
-            //             ['option_text' => 'dasd'],
-            //             ['option_text' => 'dasa'],
-            //             ['option_text' => 'dasds'],
-            //             ['option_text' => 'dasdsaa'],
-            //         ],
-            //     ],
-            //     'correct_option' => [-1, 2],
-            // ]);
         }
 
         return view('exams.edit', [
