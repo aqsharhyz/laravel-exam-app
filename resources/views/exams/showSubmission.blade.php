@@ -1,7 +1,7 @@
 <x-app-layout>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8 shadow-md rounded-lg bg-gray-800 text-white">
-        <div id="submission" route="{{ route('exams.getSubmissionData', ['lessonId' => $lessonId, 'examId' => $examId, 'submissionId' => $submissionId]) }}" name="submissionData_{{ $submissionId }}">
+        <div id="submission" route="{{ route('submissions.getData', ['lessonId' => $lessonId, 'examId' => $examId, 'submissionId' => $submissionId]) }}" name="submissionData_{{ $submissionId }}">
         </div>
 
         <a href="{{ route('exams.index', ['lessonId' => $lessonId]) }}" class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">

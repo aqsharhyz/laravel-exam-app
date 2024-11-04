@@ -6,7 +6,7 @@
             Time remaining: <span id="time" class="font-semibold">{{ $duration }}</span> seconds
         </div>
 
-        <form action="{{ route('exams.submitAttempt', ['lessonId' => $lessonId, 'examId' => $examId, 'submissionId' => $submissionId]) }}" method="POST" id="examForm">
+        <form action="{{ route('submissions.submitExamAttempt', ['lessonId' => $lessonId, 'examId' => $examId, 'submissionId' => $submissionId]) }}" method="POST" id="examForm">
             @csrf
             @foreach($questions as $question)
             <div class="form-group mb-4">

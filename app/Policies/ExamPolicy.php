@@ -2,11 +2,12 @@
 
 namespace App\Policies;
 
-use App\Models\Lesson;
+use App\Models\Enroll;
+use App\Models\Exam;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class LessonPolicy
+class ExamPolicy
 {
     /**
      * Perform pre-authorization checks.
@@ -17,22 +18,21 @@ class LessonPolicy
             return true;
         }
     }
+
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $user, Enroll $enroll): bool
     {
-        return true;
-        //!
+        return false; //!
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Lesson $lesson): bool
+    public function view(User $user, Exam $exam): bool
     {
-        return true;
-        //!
+        return $user->enrolls->contains($exam->lesson_id);
     }
 
     /**
@@ -40,14 +40,14 @@ class LessonPolicy
      */
     public function create(User $user): bool
     {
-        return false;
         //!
+        return false;
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Lesson $lesson): bool
+    public function update(User $user, Exam $exam): bool
     {
         return false;
     }
@@ -55,7 +55,7 @@ class LessonPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Lesson $lesson): bool
+    public function delete(User $user, Exam $exam): bool
     {
         return false;
     }
@@ -63,7 +63,7 @@ class LessonPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Lesson $lesson): bool
+    public function restore(User $user, Exam $exam): bool
     {
         return false;
     }
@@ -71,7 +71,7 @@ class LessonPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Lesson $lesson): bool
+    public function forceDelete(User $user, Exam $exam): bool
     {
         return false;
     }

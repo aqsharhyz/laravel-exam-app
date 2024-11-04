@@ -23,19 +23,28 @@
         <p class="mb-2 text-gray-300">{{ $exam->questions_count }} questions</p>
         <p class="mb-4 text-gray-300">{{ $exam->description }}</p>
 
-        @if(!$is_submitted)
-        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            <a href="{{ route('exams.showAttemptForm', ['lessonId' => $lessonId, 'examId' => $exam->id]) }}">
-                Attempt
-            </a>
-        </button>
-        @else
-        <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-            <a href="{{ route('exams.showSubmission', ['lessonId' => $lessonId, 'examId' => $exam->id, 'submissionId' => $submissionId]) }}">
-                View Submission
-            </a>
-        </button>
-        @endif
+        <div class="flex items-center space-x-4 mb-4">
+            @if(!$is_submitted)
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <a href="{{ route('submissions.checkAndStartAttempt', ['lessonId' => $lessonId, 'examId' => $exam->id]) }}">
+                    Attempt
+                </a>
+            </button>
+            @else
+            <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                <a href="{{ route('submissions.show', ['lessonId' => $lessonId, 'examId' => $exam->id, 'submissionId' => $submissionId]) }}">
+                    View Submission
+                </a>
+            </button>
+            @endif
+            @if(Auth::user()->isAdministrator())
+            <button class="bg-yellow-500 hover:bg-yellow-700 text-gray-700 hover:text-white font-bold py-2 px-4 rounded">
+                <a href="{{ route('exams.edit', ['lessonId' => $lessonId, 'examId' => $exam->id]) }}">
+                    Edit
+                </a>
+            </button>
+            @endif
+        </div>
     </div>
 
     @if($clearLocal)

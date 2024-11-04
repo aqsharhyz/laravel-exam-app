@@ -30,7 +30,7 @@
             <div class="mt-4 flex space-x-4">
                 <a href="{{ route('lessons.edit', ['lessonId' => $lesson->id]) }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Edit</a>
                 <a href="{{ route('exams.index', ['lessonId' => $lesson->id]) }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Go to Exam</a>
-                <a href="{{ route('lessons.addStudents', ['lessonId' => $lesson->id]) }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add Student</a>
+                {{-- <a href="{{ route('lessons.addStudents', ['lessonId' => $lesson->id]) }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add Student</a> --}}
 
                 <form action="{{ route('lessons.destroy', ['lessonId' => $lesson->id]) }}" method="POST" class="inline">
                     @csrf

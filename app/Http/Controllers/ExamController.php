@@ -3,20 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\CheckLessonEnrollmentMiddleware;
+use App\Http\Requests\ExamRequest;
 use App\Models\Enroll;
 use App\Models\Exam;
 use App\Models\Question;
 use App\Models\Submission;
-use App\Models\Answer;
 use App\Models\Lesson;
 use App\Models\Option;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
 
 class ExamController extends Controller implements HasMiddleware
 {
@@ -26,6 +26,7 @@ class ExamController extends Controller implements HasMiddleware
         return [
             'auth',
             new Middleware(CheckLessonEnrollmentMiddleware::class, except: ['create', 'store', 'edit', 'update', 'destroy'])
+            //!
         ];
     }
 
@@ -36,10 +37,11 @@ class ExamController extends Controller implements HasMiddleware
     {
         // $this->checkIfEnrolled($lessonId);
 
+        Gate::authorize('viewAny', Exam::class);
         $exams = Exam::where('lesson_id', $lessonId)->get();
         return view('exams.index', [
+            'lessonId' => $lessonId,
             'exams' => $exams,
-            'lessonId' => $lessonId
         ]);
     }
 
@@ -48,6 +50,7 @@ class ExamController extends Controller implements HasMiddleware
      */
     public function create($lessonId = null): View
     {
+        Gate::authorize('create', Exam::class);
         if ($lessonId) {
             return view('exams.edit', [
                 'exam' => new Exam(),
@@ -89,25 +92,14 @@ class ExamController extends Controller implements HasMiddleware
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, $lessonId = null)
+    public function store(ExamRequest $request, $lessonId = null)
     {
+        Gate::authorize('create', Exam::class);
         // $request->attributes->set('lesson_id', $lessonId ?? $request->get('lesson_id'));
 
         // echo json_encode($request->all());
 
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after:start_time',
-            'duration' => 'required|integer|min:1',
-            'passing_grade' => 'required|integer|min:1|max:100',
-            'total_score' => 'required|integer|min:1',
-            'lesson_id' => 'required|exists:lessons,id',
-            'questions.*' => 'required|string|max:255',
-            'options.*.*' => 'required|string|max:255',
-            'correct_option.*' => 'required|integer|min:1', // Ensure one correct option is selected
-        ]);
+        $validatedData = $request->validated();
 
         // echo json_encode($validatedData);
 
@@ -165,7 +157,8 @@ class ExamController extends Controller implements HasMiddleware
     public function show(Request $request, $lessonId, $examId): View
     {
         $exam = Exam::withCount('questions')->findOrFail($examId);
-        $submitted = Submission::where('enroll_id', $request->get('enrolled_id'))->where('exam_id', $examId)->get();
+        Gate::authorize('view', $exam);
+        $submitted = Submission::where('enroll_id', $request->input('enrolled_id'))->where('exam_id', $examId)->get();
 
         return view('exams.show', [
             'exam' => $exam,
@@ -182,6 +175,7 @@ class ExamController extends Controller implements HasMiddleware
     public function edit($lessonId, $examId): View
     {
         $exam = Exam::findOrFail($examId);
+        Gate::authorize('update', $exam);
         $questions = Question::where('exam_id', $examId)->get();
         $options = Option::whereIn('question_id', $questions->pluck('id'))->select('id', 'question_id', 'option_text', 'is_correct')->get();
 
@@ -216,26 +210,13 @@ class ExamController extends Controller implements HasMiddleware
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $lessonId, $examId)
+    public function update(ExamRequest $request, $lessonId, $examId)
     {
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after:start_time',
-            'duration' => 'required|integer|min:1',
-            'passing_grade' => 'required|integer|min:1|max:total_score',
-            'total_score' => 'required|integer|min:1',
-            'lesson_id' => 'required|exists:lessons,id',
-            'questions.*' => 'required|string|max:255',
-            'options.*.*' => 'required|string|max:255',
-            'correct_option.*' => 'required|integer|min:1', // Ensure one correct option is selected
-        ]);
-
-        // echo json_encode($validatedData);
-        // return;
-
         $exam = Exam::findOrFail($examId);
+        Gate::authorize('update', $exam);
+        $validatedData = $request->validated();
+
+        //!
         $exam->update([
             'title' => $request->title,
             'description' => $request->description,
@@ -293,151 +274,16 @@ class ExamController extends Controller implements HasMiddleware
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy()
+    public function destroy($examId)
     {
-        //
+        $exam = Exam::findOrFail($examId);
+        Gate::authorize('delete', $exam);
+        $exam->delete();
+        return redirect()->route('exams.index', ['lessonId' => $exam->lesson_id]);
     }
 
-    public function attempt(Request $request, $lessonId, $examId)
-    {
-        $submitted = Submission::where('enroll_id', $request->get('enrolled_id'))->where('exam_id', $examId)->get();
-        // echo $submitted;
-        // echo $request->get('enrolled_id');
-
-        if ($submitted->isNotEmpty()) {
-            return redirect()->route('exams.showSubmission', [
-                'lessonId' => $lessonId,
-                'examId' => $examId,
-                'submissionId' => $submitted->last()->id
-            ]);
-        }
-
-        return $this->attemptExam($lessonId, $request->get('enrolled_id'), $examId);
-    }
-
-    function attemptExam($lessonId, $enrolledId, $examId): View
-    {
-        if (Cache::has('exam_' . $examId)) {
-            $exam = Cache::get('exam_' . $examId);
-            $duration = $exam['exam']['duration'];
-            $questions = $exam['questions'];
-        } else {
-            $duration = Exam::where('id', $examId)->select('duration')->first()->duration;
-            $exam = Exam::findOrFail($examId);
-            $questions = Question::with(['options' => function ($query) {
-                $query->select('id', 'question_id', 'option_text');
-            }])
-                ->where('exam_id', $examId)
-                ->select('id', 'question_text')
-                ->get();
-
-            Cache::put('exam_' . $examId, ['exam' => $exam, 'questions' => $questions]);
-        }
-
-        $submission = Submission::create([
-            'enroll_id' => $enrolledId,
-            'exam_id' => $examId,
-            // 'user_id' => Auth::id(),
-        ]);
-
-        return view('exams.showAttemptForm', [
-            'questions' => $questions,
-            'lessonId' => $lessonId,
-            'examId' => $examId,
-            'duration' => $duration,
-            'submissionId' => $submission->id
-        ]);
-    }
-
-    public function submit(Request $request, $lessonId, $examId, $submissionId)
-    {
-        // $questions = Question::where('exam_id', $examId)->get();
-        $questions = Question::with(['options' => function ($query) {
-            $query->select('id', 'question_id')->where('is_correct', true);
-        }])
-            ->where('exam_id', $examId)
-            ->select('id')
-            ->get();
-
-        $request->validate([
-            'answers' => 'required|array',
-            'answers.*' => 'exists:options,id',
-        ]);
-
-        // echo $questions;
-        // echo $request->input("answers.1");
-        $score = 0;
-        foreach ($questions as $question) {
-            // echo $question->options->first()->id;
-            if (!$request->has("answers.$question->id")) {
-                continue;
-            }
-            Answer::create([
-                'submission_id' => $submissionId,
-                'question_id' => $question->id,
-                'selected_option_id' => $request->input("answers.$question->id"),
-            ]);
-            if ($request->input("answers.$question->id") == $question->options->first()->id) {
-                $score++;
-            }
-        }
-
-        $submission = Submission::find($submissionId);
-        $exam = Exam::find($examId);
-        $score = ($score / count($questions)) * $exam->total_score;
-        $submission->score = $score;
-        $submission->save();
-
-        // echo $score;
-        // return;
-        return redirect()->route('exams.showSubmission', [
-            'lessonId' => $lessonId,
-            'examId' => $examId,
-            'submissionId' => $submissionId
-        ]);
-    }
-
-    public function showSubmission($lessonId, $examId, $submissionId): View
-    {
-        return view('exams.showSubmission', [
-            'lessonId' => $lessonId,
-            'examId' => $examId,
-            'submissionId' => $submissionId,
-        ]);
-    }
-
-    public function getSubmissionData($lessonId, $examId, $submissionId): JsonResponse
-    {
-        $submission = Submission::with(['answers' => function ($query) {
-            $query->select('question_id', 'selected_option_id', 'submission_id', 'id');
-        }])
-            ->where('id', $submissionId)
-            ->select('id', 'score', 'created_at')
-            ->first();
-
-        $questions = Question::with(['options' => function ($query) {
-            $query->select('id', 'question_id', 'option_text', 'is_correct');
-        }])
-            ->where('exam_id', $examId)
-            ->select('id', 'question_text')
-            ->get();
-
-        $exam = Exam::where('id', $examId)->select('title', 'passing_grade')->first();
-
-        return response()->json([
-            'data' => [
-                'lessonId' => $lessonId,
-                'examId' => $examId,
-                'submissionId' => $submissionId,
-                'exam' => $exam,
-                'submission' => $submission,
-                'questions' => $questions
-            ]
-        ]);
-    }
-
-    function checkIfEnrolled($lessonId)
-    {
-        return Enroll::where('user_id', Auth::id())->where('lesson_id', $lessonId)->exists();
-    }
+    // function checkIfEnrolled($lessonId)
+    // {
+    //     return Enroll::where('user_id', Auth::id())->where('lesson_id', $lessonId)->exists();
+    // }
 }

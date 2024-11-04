@@ -12,11 +12,14 @@ use Illuminate\Support\Facades\Gate;
 
 class LessonController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
     public function showPublic()
     {
+        Gate::authorize('viewAny', Lesson::class);
+
         return view('lessons.showPublic', [
             'lessons' => Lesson::all(),
         ]);
@@ -24,6 +27,8 @@ class LessonController extends Controller
 
     public function showActive()
     {
+        Gate::authorize('viewAny', Lesson::class);
+
         return view('lessons.showActive', [
             'lessons' => Lesson::whereHas('enrolls', function ($query) {
                 $query->where('user_id', Auth::id());
@@ -36,6 +41,7 @@ class LessonController extends Controller
      */
     public function create()
     {
+        Gate::authorize('create', Lesson::class);
         return view('lessons.edit', [
             'lesson' => new Lesson(),
         ]);
@@ -47,6 +53,7 @@ class LessonController extends Controller
     public function store(LessonRequest $request)
     {
         Gate::authorize('create', Lesson::class);
+
         $lesson = Lesson::create($request->validated());
 
         return redirect()->route('lessons.show', ['lessonId' => $lesson->id])->with('success', 'Lesson created successfully');
@@ -57,6 +64,8 @@ class LessonController extends Controller
      */
     public function show($lessonId)
     {
+        Gate::authorize('view', Lesson::findOrFail($lessonId));
+
         return view('lessons.show', [
             'lesson' => Lesson::findOrFail($lessonId),
             'is_enrolled' => Enroll::where('user_id', Auth::id())->where('lesson_id', $lessonId)->exists(),
@@ -68,6 +77,8 @@ class LessonController extends Controller
      */
     public function edit($lessonId)
     {
+        Gate::authorize('update', Lesson::findOrFail($lessonId));
+
         return view('lessons.edit', [
             'lesson' => Lesson::findOrFail($lessonId),
         ]);
@@ -78,9 +89,10 @@ class LessonController extends Controller
      */
     public function update(LessonRequest $request, $lessonId)
     {
-        Gate::authorize('update', Lesson::findOrFail($lessonId));
-
         $lesson = Lesson::findOrFail($lessonId);
+
+        Gate::authorize('update', $lesson);
+
         $lesson->update($request->validated());
 
         return redirect()->route('lessons.show', ['lessonId' => $lesson->id]);
@@ -92,69 +104,10 @@ class LessonController extends Controller
     public function destroy($lessonId)
     {
         //! soft delete
-        Lesson::findOrFail($lessonId)->delete();
+        $lesson = Lesson::findOrFail($lessonId);
+        Gate::authorize('delete', $lesson);
+        $lesson->delete();
+
         return redirect()->route('admin.dashboard')->with('success', 'Lesson deleted successfully');
-    }
-
-    public function enroll($lessonId)
-    {
-        if (Enroll::where('user_id', Auth::id())->where('lesson_id', $lessonId)->exists()) {
-            return redirect()->route('lessons.showActive');
-            //!
-        }
-
-        if (!Lesson::findOrFail($lessonId)->is_active) {
-            // return redirect()->route('lessons.showActive');
-            //!
-        }
-
-        if (!(Lesson::findOrFail($lessonId)->visibility === 'public')) {
-            // return redirect()->route('lessons.showActive');
-            //!
-        }
-
-        Enroll::create([
-            'user_id' => Auth::id(),
-            'lesson_id' => $lessonId,
-        ]);
-
-        return redirect()->back()->with('success', 'Enrolled successfully');
-    }
-
-    public function unenroll($lessonId)
-    {
-        if (!Enroll::where('user_id', Auth::id())->where('lesson_id', $lessonId)->exists()) {
-            return redirect()->back()->with('error', 'You are not enrolled in this lesson');
-        }
-        Enroll::where('user_id', Auth::id())->where('lesson_id', $lessonId)->delete();
-        return redirect()->back()->with('success', 'Unenrolled successfully');
-    }
-
-    public function addStudents($lessonId)
-    {
-        return view('lessons.addStudents', [
-            'lesson' => Lesson::findOrFail($lessonId),
-            'students' => User::all(),
-        ]);
-    }
-
-    public function storeStudent(Request $request, $lessonId)
-    {
-        $request->validate([
-            'emails' => 'required|string|email',
-        ]);
-
-        $emails = explode(',', $request->emails);
-        foreach ($emails as $email) {
-            $user = User::where('email', $email)->first();
-            if ($user) {
-                Enroll::create([
-                    'user_id' => $user->id,
-                    'lesson_id' => $lessonId,
-                ]);
-            }
-        }
-
-        return redirect()->back()->with('success', 'Students added successfully');
     }
 }

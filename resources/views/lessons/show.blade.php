@@ -34,14 +34,14 @@
                     Unenroll
                 </button>
             </form>
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+                <a href="{{ route('exams.index', ['lessonId' => $lesson->id]) }}" class="text-white hover:underline">Exams</a>
+            </button>
             @if(Auth::user()->role == 'admin')
             <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
                 <a href="{{ route('lessons.edit', ['lessonId' => $lesson->id]) }}" class="text-white hover:underline">Edit</a>
             </button>
             @endif
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
-                <a href="{{ route('exams.index', ['lessonId' => $lesson->id]) }}" class="text-white hover:underline">Exams</a>
-            </button>
         </div>
         @endif
     </div>
