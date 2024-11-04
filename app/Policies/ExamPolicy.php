@@ -17,6 +17,8 @@ class ExamPolicy
         if ($user->isAdministrator()) {
             return true;
         }
+
+        return null;
     }
 
     /**

@@ -17,6 +17,8 @@ class EnrollPolicy
         if ($user->isAdministrator()) {
             return true;
         }
+
+        return null;
     }
 
     /**

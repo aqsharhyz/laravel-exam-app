@@ -16,6 +16,8 @@ class SubmissionPolicy
         if ($user->isAdministrator()) {
             return true;
         }
+
+        return null;
     }
 
     /**

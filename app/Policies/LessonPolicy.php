@@ -16,6 +16,8 @@ class LessonPolicy
         if ($user->isAdministrator()) {
             return true;
         }
+
+        return null;
     }
     /**
      * Determine whether the user can view any models.
