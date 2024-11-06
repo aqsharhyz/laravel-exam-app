@@ -56,7 +56,8 @@ Route::middleware('auth')->prefix('lessons')->group(function () {
 
         Route::get('/exams/{examId}/attempt', [SubmissionController::class, 'checkAndStartExamAttempt'])->name('submissions.checkAndStartAttempt');
         // Route::get('/exams/{examId}/attempt/{submissionId}', [SubmissionController::class, 'checkAndStartExamAttempt'])->name('submissions.checkAndStartAttempt');
-        Route::post('/exams/{examId}/attempt/{submissionId}', [SubmissionController::class, 'submitExamAttempt'])->name('submissions.submitExamAttempt');
+        Route::post('/exams/{examId}/attempt/{submissionId}', [SubmissionController::class, 'saveAnswer'])->name('submissions.saveAnswer');
+        Route::post('/exams/{examId}/attempt/{submissionId}/submit', [SubmissionController::class, 'submitExamAttempt'])->name('submissions.submitExamAttempt');
         Route::get('/exams/{examId}/submissions/{submissionId}', [SubmissionController::class, 'show'])->name('submissions.show');
         Route::get('/exams/{examId}/submissions/{submissionId}/data', [SubmissionController::class, 'getData'])->name('submissions.getData');
     });

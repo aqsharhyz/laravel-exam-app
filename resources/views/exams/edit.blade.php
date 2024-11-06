@@ -89,6 +89,10 @@
             let options = JSON.parse(localStorage.getItem("options")) || <?php echo json_encode($options); ?>;
             let correct_option = JSON.parse(localStorage.getItem("correct_option")) || <?php echo json_encode($correct_option); ?>;
 
+            console.log(questions);
+            console.log(options);
+            console.log(correct_option);
+
             questions.forEach((question, index) => {
                 const question_text = question.question_text || '';
                 const options_for_question = options[index] || [];
@@ -104,11 +108,13 @@
 
                 for (let i = 0; i < options_for_question.length; i++) {
                     const option_text = options_for_question[i].option_text || '';
+                    console.log(correct_option_for_question == (i));
+
                     const newOptionBlock = `
                         <div class="option-block mb-2">
                             <label for="options[${index}]">Option:</label>
                             <input type="text" name="options[${index}][${i}]" value="${option_text}" class="mt-1 p-2 w-full border border-gray-600 rounded bg-gray-700 text-white" required>
-                            <input type="radio" name="correct_option[${index}]" value="${(i + 1)}" ${correct_option_for_question == (i + 1) ? 'checked' : ''}> Correct
+                            <input type="radio" name="correct_option[${index}]" value="${(i + 1)}" ${correct_option_for_question == (i) ? 'checked' : ''}> Correct
                         </div>
                     `;
                     $(`#questions-container .question-block:eq(${index}) .options-container`).append(newOptionBlock);

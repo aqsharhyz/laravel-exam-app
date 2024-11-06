@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Exam;
 use App\Models\Submission;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
@@ -44,6 +45,35 @@ class SubmissionPolicy
     {
         //!
         return false;
+    }
+
+    public function attempt(User $user, Submission $submission, $lessonId, $enrolledId, $examId): bool | Response
+    {
+        $submitted = Submission::where('enroll_id', $enrolledId)
+            ->where('exam_id', $examId)
+            ->where('is_submitted', true)
+            ->get();
+
+        if ($submitted->isNotEmpty()) {
+            return redirect()->route('submissions.show', [
+                'lessonId' => $lessonId,
+                'examId' => $examId,
+                'submissionId' => $submitted->last()->id
+            ]);
+        }
+
+        $submission = Submission::where('enroll_id', $enrolledId)
+            ->where('exam_id', $examId)
+            ->where('is_submitted', false)
+            ->get();
+
+        $examDuration = Exam::where('id', $examId)->select('duration')->first()->duration;
+
+        if ($submission->last()->created_at->diffInSeconds(now()) > $examDuration) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

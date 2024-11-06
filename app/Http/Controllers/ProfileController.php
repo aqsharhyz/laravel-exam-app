@@ -85,4 +85,22 @@ class ProfileController extends Controller
             ],
         ]);
     }
+
+    public function uploadProfilePicture(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'profile_picture' => ['required', 'image'],
+        ]);
+
+        $request->user()->updateProfilePicture($request->file('profile_picture'));
+
+        return Redirect::route('profile.edit')->with('status', 'profile-picture-updated');
+    }
+
+    public function deleteProfilePicture(Request $request): RedirectResponse
+    {
+        $request->user()->deleteProfilePicture();
+
+        return Redirect::route('profile.edit')->with('status', 'profile-picture-deleted');
+    }
 }

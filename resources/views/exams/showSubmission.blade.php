@@ -14,30 +14,43 @@
             const submission_header = `
                 <h1 class="text-2xl font-bold mb-4">Submitted Exam</h1>
                 <h2 class="text-xl mb-2">${data.exam.title}</h2>
-                <p class="mb-2 ${status == 'Passed' ? 'text-green-500' : 'text-red-500'}">${status}</p>
-                <p class="mb-2">Score: ${data.submission.score || 0}</p>
-                <p class="mb-4">Passing Grade: ${data.exam.passing_grade}</p>
-                <p class="mb-4">Submitted: ${data.submission.created_at}</p>
-            `;
+                ${data.exam.hide_score ? '' : `
+                    ${data.exam.passing_grade >= 0 ? `<p class="mb-2 ${status == 'Passed' ? 'text-green-500' : 'text-red-500'}">${status}</p>` : ''}
+                    <p class="mb-2">Score: ${data.submission.score || 0}</p>
+                    ${data.exam.passing_grade >= 0 ? `<p class="mb-4">Passing Grade: ${data.exam.passing_grade}</p>` : ''}
+                `}
+                <p class="mb-4">Submitted: ${data.submission.updated_at}</p>
+            `; //! total question
 
             const questions = data.questions.map(question => {
                 const userAnswer = data.submission.answers.find(answer => answer.question_id === question.id)?.selected_option_id;
                 const isAnswered = userAnswer !== undefined;
                 const correctOption = question.options.find(option => option.is_correct);
+                const hideCorrectAnswer = data.exam.hide_correct_answers;
 
                 const questionOptions = question.options.map(option => {
                     let optionText = option.option_text;
-                    if (option.is_correct && userAnswer === option.id) {
+                    if (hideCorrectAnswer && isAnswered && userAnswer === option.id) {
+                        optionText = `<strong>${option.option_text}</strong>`;
+                    } else if (hideCorrectAnswer && isAnswered) {
+                        optionText = `<span class="text-gray-400">${option.option_text}</span>`;
+                    } else if (hideCorrectAnswer) {
+                        optionText = `<span class="text-gray-100">${option.option_text}</span>`;
+                    } else if (option.is_correct && userAnswer === option.id) {
                         optionText = `<strong>${option.option_text} (Correct)</strong>`;
                     } else if (!option.is_correct && userAnswer === option.id) {
                         optionText = `<strong>${option.option_text} (Incorrect)</strong>`;
                     } else if (!isAnswered && option.is_correct) {
-                        optionText = `<span class="text-gray-600">${option.option_text} (Correct Answer)</span>`;
+                        optionText = `<span class="text-gray-900">${option.option_text} (Correct Answer)</span>`;
                     }
                     return `<p>${optionText}</p>`;
                 }).join('');
                 return `
-                    <div class="form-group mb-4 p-4 rounded-lg ${isAnswered ? (correctOption && userAnswer === correctOption.id ? 'bg-green-500' : 'bg-red-500') : 'bg-yellow-500'}">
+                    ${hideCorrectAnswer ? `
+                        <div class="form-group mb-4 p-4 rounded-lg ${isAnswered ? 'bg-blue-500' : 'bg-yellow-600'}">
+                    ` : `
+                        <div class="form-group mb-4 p-4 rounded-lg ${isAnswered ? (userAnswer === correctOption.id ? 'bg-green-500' : 'bg-red-500') : 'bg-yellow-600'}">
+                    `}
                         <label class="font-semibold">${question.question_text}</label>
                         ${questionOptions}
                     </div>
@@ -62,8 +75,10 @@
                         const data = response.data;
                         try {
                             build_submission(data);
-                            localStorage.setItem('submissionData_' + data.submission.id, JSON.stringify(data));
+                            // localStorage.setItem('submissionData_' + data.submission.id, JSON.stringify(data));
                         } catch (e) {
+                            console.log(e);
+
                             $('#submission').html('<p class="text-red-500">Failed to load submission data</p>');
                         }
                     },

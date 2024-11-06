@@ -20,34 +20,48 @@
         </div>
     </div>
     <script>
+        function build_report(data) {
+            const report = `
+                <h2 class="text-xl font-bold mb-4">Report</h2>
+                <ul class="space-y-4">
+                    <li class="p-4 rounded-lg border border-gray-600 bg-gray-700 shadow">
+                        <p class="text-lg font-semibold text-blue-300 hover:underline">
+                            Total Active Lessons: ${data.total_lessons}
+                        </p>
+                    </li>
+                    <li class="p-4 rounded-lg border border-gray-600 bg-gray-700 shadow">
+                        <p class="text-lg font-semibold text-blue-300 hover:underline">
+                            Total Exams Submission: ${data.total_exams_submission}
+                        </p>
+                    </li>
+                </ul>
+            `;
+            $('#report').html(report);
+        }
+
         $(document).ready(function() {
             $('#report').html('Loading...');
-            $.ajax({
-                url: $('#report').attr('route'),
-                success: function(response) {
-                    const data = response.data;
-                    // localStorage.setItem('reportData', JSON.stringify(data)); //!
-                    const report = `
-                        <h2 class="text-xl font-bold mb-4">Report</h2>
-                        <ul class="space-y-4">
-                            <li class="p-4 rounded-lg border border-gray-600 bg-gray-700 shadow">
-                                <p class="text-lg font-semibold text-blue-300 hover:underline">
-                                    Total Active Lessons: ${data.total_lessons}
-                                </p>
-                            </li>
-                            <li class="p-4 rounded-lg border border-gray-600 bg-gray-700 shadow">
-                                <p class="text-lg font-semibold text-blue-300 hover:underline">
-                                    Total Exams Submission: ${data.total_exams_submission}
-                                </p>
-                            </li>
-                        </ul>
-                    `;
-                    $('#report').html(report);
-                },
-                error: function(error) {
-                    $('#report').html('<p class="text-red-500">Failed to load report data</p>');
-                }
-            });
+            try {
+                const data = JSON.parse(localStorage.getItem('reportData'));
+                build_report(data);
+            } catch {
+                $.ajax({
+                    url: $('#report').attr('route'),
+                    success: function(response) {
+                        const data = response.data;
+                        try {
+                            build_report(data);
+                            localStorage.setItem('reportData', JSON.stringify(data));
+                        } catch (e) {
+                            $('#report').html('<p class="text-red-500">Failed to load report data</p>');
+                        }
+
+                    },
+                    error: function(error) {
+                        $('#report').html('<p class="text-red-500">Failed to load report data</p>');
+                    }
+                });
+            }
         });
     </script>
 </x-app-layout>

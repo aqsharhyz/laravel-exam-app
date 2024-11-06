@@ -20,7 +20,6 @@ class AdminMiddleware
             abort(403, 'Unauthorized action.');
         }
 
-        // $request->attributes->set('is_admin', true);
         return $next($request);
     }
 }

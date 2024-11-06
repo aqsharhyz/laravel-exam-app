@@ -77,13 +77,7 @@ class ExamController extends Controller implements HasMiddleware
     public function store(ExamRequest $request, $lessonId = null)
     {
         Gate::authorize('create', Exam::class);
-        // $request->attributes->set('lesson_id', $lessonId ?? $request->get('lesson_id'));
-
-        // echo json_encode($request->all());
-
         $validatedData = $request->validated();
-
-        // echo json_encode($validatedData);
 
         $exam = Exam::create([
             'title' => $request->title,
@@ -96,36 +90,19 @@ class ExamController extends Controller implements HasMiddleware
             'lesson_id' => $request->lesson_id,
         ]);
 
-        // echo $exam;
-
         foreach ($validatedData['questions'] as $index => $question) {
             $newQuestion = Question::create(['question_text' => $question, 'exam_id' => $exam->id]);
 
-            // echo $newQuestion;
-
             foreach ($validatedData['options'][$index] as $optionIndex => $option) {
-                // echo $optionIndex . ' ' . $option;
-                // echo $validatedData['correct_option'][$index];
-                // echo (($optionIndex + 1) === ((int) $validatedData['correct_option'][$index]));
                 Option::create([
                     'question_id' => $newQuestion->id,
                     'option_text' => $option,
                     'is_correct' => ($optionIndex + 1) === (int) $validatedData['correct_option'][$index], // Check if this option is the correct one
                 ]);
-
-                // echo $newOption;
             }
         }
 
-        $question = Question::with(['options' => function ($query) {
-            $query->select('id', 'question_id', 'option_text');
-        }])
-            ->where('exam_id', $exam->id)
-            ->select('id', 'question_text')
-            ->get();
-
-        Cache::put('exam_' . $exam->id, ['exam' => $exam, 'questions' => $question]);
-
+        $this->makeExamCache($exam);
 
         return redirect()->route('exams.show', [
             'lessonId' => $request->lesson_id,
@@ -140,13 +117,13 @@ class ExamController extends Controller implements HasMiddleware
     {
         $exam = Exam::withCount('questions')->findOrFail($examId);
         Gate::authorize('view', $exam);
-        $submitted = Submission::where('enroll_id', $request->input('enrolled_id'))->where('exam_id', $examId)->get();
+        $submission = Submission::where('enroll_id', $request->get('enrolled_id'))->where('exam_id', $examId)->get()->last();
 
         return view('exams.show', [
             'exam' => $exam,
             'lessonId' => $lessonId,
-            'is_submitted' => $submitted->isNotEmpty(),
-            'submissionId' => $submitted->last()->id ?? null,
+            'is_submitted' => $submission->is_submitted ?? false,
+            'submissionId' => $submission->id ?? null,
             'clearLocal' => $request->session()->pull('clearLocal', false),
         ]);
     }
@@ -156,36 +133,36 @@ class ExamController extends Controller implements HasMiddleware
      */
     public function edit($lessonId, $examId): View
     {
+        // Retrieve the exam and related questions
         $exam = Exam::findOrFail($examId);
         Gate::authorize('update', $exam);
         $questions = Question::where('exam_id', $examId)->get();
-        $options = Option::whereIn('question_id', $questions->pluck('id'))->select('id', 'question_id', 'option_text', 'is_correct')->get();
 
-        // print_r($options);
-        // echo $questions;
-        // echo $options->groupBy('question_id');
-        $s = array_values($options->groupBy('question_id')->toArray());
-        // foreach ($s as $key => $value) {
-        //     // $d[$key] = $value;
-        //     $s[$key - 1] = $s[$key];
-        //     unset($s[$key]);
-        // }
-        $r = array_values($options->where('is_correct', true)->pluck('option_text', 'question_id')->toArray());
-        foreach ($s as $key => $value) {
-            foreach ($value as $key1 => $v) {
-                if ($v['is_correct']) {
-                    $r[$key] = $key1 + 1;
+        // Retrieve options for the questions
+        $options = Option::whereIn('question_id', $questions->pluck('id'))
+            ->select('id', 'question_id', 'option_text', 'is_correct')
+            ->get();
+
+        // Group options by question ID
+        $groupedOptions = $options->groupBy('question_id')->toArray();
+        $formattedOptions = array_values($groupedOptions);
+
+        // Find correct options for each question
+        $correctOptions = [];
+        foreach ($formattedOptions as $key => $option) {
+            foreach ($option as $key1 => $value) {
+                if ($value['is_correct']) {
+                    $correctOptions[$key] = $key1;
                 }
             }
         }
-        // print_r($r);
 
         return view('exams.edit', [
             'exam' => $exam,
             'lesson' => Lesson::findOrFail($lessonId),
             'questions' => $questions,
-            'options' => $s,
-            'correct_option' => $r,
+            'options' => $formattedOptions,
+            'correct_option' => $correctOptions,
         ]);
     }
 
@@ -213,10 +190,6 @@ class ExamController extends Controller implements HasMiddleware
         $questions = Question::where('exam_id', $examId)->get();
         $options = Option::whereIn('question_id', $questions->pluck('id'))->get();
 
-        // echo json_encode($questions);
-        // echo json_encode($options);
-        // return;
-
         foreach ($questions as $question) {
             $question->delete();
         }
@@ -237,15 +210,7 @@ class ExamController extends Controller implements HasMiddleware
             }
         }
 
-        $question = Question::with(['options' => function ($query) {
-            $query->select('id', 'question_id', 'option_text');
-        }])
-            ->where('exam_id', $examId)
-            ->select('id', 'question_text')
-            ->get();
-
-
-        Cache::put('exam_' . $examId, ['exam' => $exam, 'questions' => $question]);
+        $this->makeExamCache($exam);
 
         return redirect()->route('exams.show', [
             'lessonId' => $request->lesson_id,
@@ -268,4 +233,16 @@ class ExamController extends Controller implements HasMiddleware
     // {
     //     return Enroll::where('user_id', Auth::id())->where('lesson_id', $lessonId)->exists();
     // }
+
+    function makeExamCache(Exam $exam)
+    {
+        $question = Question::with(['options' => function ($query) {
+            $query->select('id', 'question_id', 'option_text');
+        }])
+            ->where('exam_id', $exam->id)
+            ->select('id', 'question_text')
+            ->get();
+
+        Cache::put('exam_' . $exam->id, ['exam' => $exam, 'questions' => $question]);
+    }
 }
