@@ -13,7 +13,7 @@
 
     <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8 bg-gray-800 text-white rounded-lg shadow-md">
         <h1 class="text-2xl font-bold mb-4">{{ isset($exam->id) ? 'Edit Exam' : 'Create Exam' }}</h1>
-        <form id="exam-form" action="{{ isset($exam->id) ? route('exams.update', ['lessonId' => $lesson->id, 'examId' => $exam->id]) : route('exams.store') }}" method="POST">
+        <form id="exam-form" action="{{ isset($exam->id) ? route('exams.update', ['lessonId' => $lessons->first()->id, 'examId' => $exam->id]) : route('exams.store') }}" method="POST">
             @csrf
             @if(isset($exam->id))
             @method('PATCH')
@@ -56,16 +56,15 @@
 
             <div class="mb-4">
                 <label for="lesson_id" class="block text-sm font-medium">Lesson</label>
-                @if(isset($lesson))
-                <input type="text" value="{{ $lesson->title }}" class="mt-1 p-2 w-full border border-gray-600 rounded bg-gray-700 text-white" disabled>
-                <input type="hidden" name="lesson_id" value="{{ $lesson->id }}">
-                @else
                 <select name="lesson_id" id="lesson_id" class="mt-1 p-2 w-full border border-gray-600 rounded bg-gray-700 text-white">
+                    @if($lessons->count() == 1)
+                    <option value="{{ $lessons->first()->id }}" selected disabled>{{ $lessons->first()->title }}</option>
+                    @else
                     @foreach($lessons as $lesson)
                     <option value="{{ $lesson->id }}" {{ old('lesson_id', $exam->lesson_id) == $lesson->id ? 'selected' : '' }}>{{ $lesson->title }}</option>
                     @endforeach
+                    @endif
                 </select>
-                @endif
             </div>
 
             <div id="questions-container"></div>
@@ -89,9 +88,9 @@
             let options = JSON.parse(localStorage.getItem("options")) || <?php echo json_encode($options); ?>;
             let correct_option = JSON.parse(localStorage.getItem("correct_option")) || <?php echo json_encode($correct_option); ?>;
 
-            console.log(questions);
-            console.log(options);
-            console.log(correct_option);
+            // console.log(questions);
+            // console.log(options);
+            // console.log(correct_option);
 
             questions.forEach((question, index) => {
                 const question_text = question.question_text || '';
@@ -200,21 +199,6 @@
                 localStorage.setItem("questions", JSON.stringify(questions_local));
                 localStorage.setItem("options", JSON.stringify(options_local));
                 localStorage.setItem("correct_option", JSON.stringify(correct_option_local));
-
-                // $("<input />").attr("type", "hidden")
-                //     .attr("name", "questions")
-                //     .attr("value", JSON.stringify(questions))
-                //     .appendTo("#exam-form");
-
-                // $("<input />").attr("type", "hidden")
-                //     .attr("name", "options")
-                //     .attr("value", JSON.stringify(options))
-                //     .appendTo("#exam-form");
-
-                // $("<input />").attr("type", "hidden")
-                //     .attr("name", "correct_option")
-                //     .attr("value", JSON.stringify(correct_option))
-                //     .appendTo("#exam-form");
             });
         });
     </script>

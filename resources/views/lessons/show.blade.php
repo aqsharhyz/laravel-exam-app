@@ -46,20 +46,3 @@
         @endif
     </div>
 </x-app-layout>
-
-<style>
-    .text-gray-700 {
-        color: #4a5568;
-        /* Dark gray for text */
-    }
-
-    .text-green-600 {
-        color: #48bb78;
-        /* Green for "Enrolled" message */
-    }
-
-    .shadow-md {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        /* Soft shadow for the card */
-    }
-</style>

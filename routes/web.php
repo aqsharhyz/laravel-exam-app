@@ -47,9 +47,9 @@ Route::middleware('auth')->prefix('lessons')->group(function () {
         // Route::post('/add', [LessonController::class, 'storeStudent'])->name('lessons.storeStudent');
 
         Route::get('/exams/', [ExamController::class, 'index'])->name('exams.index');
-        Route::get('/exams/{examId}', [ExamController::class, 'show'])->name('exams.show');
         Route::get('/exams/create', [ExamController::class, 'create'])->name('exams.createInLesson');
         Route::post('/exams', [ExamController::class, 'store'])->name('exams.storeInLesson');
+        Route::get('/exams/{examId}', [ExamController::class, 'show'])->name('exams.show');
         Route::get('/exams/{examId}/edit', [ExamController::class, 'edit'])->name('exams.edit');
         Route::patch('/exams/{examId}', [ExamController::class, 'update'])->name('exams.update');
         Route::delete('/exams/{examId}', [ExamController::class, 'destroy'])->name('exams.destroy');

@@ -43,6 +43,7 @@
 
             <div class="mb-4">
                 <label for="is_active" class="inline-flex items-center">
+                    <input type="hidden" name="is_active" value="0">
                     <input type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', $lesson->is_active) ? 'checked' : '' }} class="mr-2">
                     <span class="text-sm font-medium">Active</span>
                 </label>

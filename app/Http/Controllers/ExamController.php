@@ -35,9 +35,6 @@ class ExamController extends Controller implements HasMiddleware
      */
     public function index(Request $request, $lessonId): View
     {
-        // $this->checkIfEnrolled($lessonId);
-
-        // dd(Enroll::findOrFail('enroll_id', $request->get('enrolled_id')));
         Gate::authorize('viewAny', Exam::where('lesson_id', $lessonId)->first());
         $exams = Exam::where('lesson_id', $lessonId)->get();
         return view('exams.index', [
@@ -52,19 +49,10 @@ class ExamController extends Controller implements HasMiddleware
     public function create($lessonId = null): View
     {
         Gate::authorize('create', Exam::class);
-        if ($lessonId) {
-            return view('exams.edit', [
-                'exam' => new Exam(),
-                'lesson' => Lesson::findOrFail($lessonId),
-                'questions' => [new Question()],
-                'options' => [[new Option(), new Option()]],
-                'correct_option' => [-1],
-            ]);
-        }
 
         return view('exams.edit', [
             'exam' => new Exam(),
-            'lessons' => Lesson::all(),
+            'lessons' => $lessonId ? collect([Lesson::findOrFail($lessonId)]) : Lesson::all(),
             'questions' => [new Question()],
             'options' => [[new Option(), new Option()]],
             'correct_option' => [],
@@ -159,7 +147,7 @@ class ExamController extends Controller implements HasMiddleware
 
         return view('exams.edit', [
             'exam' => $exam,
-            'lesson' => Lesson::findOrFail($lessonId),
+            'lessons' => collect([Lesson::findOrFail($lessonId)]),
             'questions' => $questions,
             'options' => $formattedOptions,
             'correct_option' => $correctOptions,
@@ -177,14 +165,14 @@ class ExamController extends Controller implements HasMiddleware
 
         //!
         $exam->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
-            'duration' => $request->duration,
-            'passing_grade' => $request->passing_grade,
-            'total_score' => $request->total_score,
-            'lesson_id' => $request->lesson_id,
+            'title' => $validatedData['title'],
+            'description' => $validatedData['description'],
+            'start_time' => $validatedData['start_time'],
+            'end_time' => $validatedData['end_time'],
+            'duration' => $validatedData['duration'],
+            'passing_grade' => $validatedData['passing_grade'],
+            'total_score' => $validatedData['total_score'],
+            'lesson_id' => $validatedData['lesson_id'],
         ]);
 
         $questions = Question::where('exam_id', $examId)->get();
@@ -228,11 +216,6 @@ class ExamController extends Controller implements HasMiddleware
         $exam->delete();
         return redirect()->route('exams.index', ['lessonId' => $exam->lesson_id]);
     }
-
-    // function checkIfEnrolled($lessonId)
-    // {
-    //     return Enroll::where('user_id', Auth::id())->where('lesson_id', $lessonId)->exists();
-    // }
 
     function makeExamCache(Exam $exam)
     {

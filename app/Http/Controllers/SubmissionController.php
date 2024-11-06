@@ -79,8 +79,8 @@ class SubmissionController extends Controller implements HasMiddleware
             $duration = $exam['exam']['duration'];
             $questions = $exam['questions'];
         } else {
-            $duration = Exam::where('id', $examId)->select('duration')->first()->duration;
             $exam = Exam::findOrFail($examId);
+            $duration = $exam->duration;
             $questions = Question::with(['options' => function ($query) {
                 $query->select('id', 'question_id', 'option_text');
             }])
@@ -142,11 +142,21 @@ class SubmissionController extends Controller implements HasMiddleware
             if (!$request->has("answers.$question->id")) {
                 continue;
             }
-            Answer::create([
-                'submission_id' => $submissionId,
-                'question_id' => $question->id,
-                'selected_option_id' => $request->input("answers.$question->id"),
-            ]);
+            $answer = Answer::where('submission_id', $submissionId)
+                ->where('question_id', $question->id)
+                ->first();
+
+            if ($answer) {
+                $answer->selected_option_id = $request->input("answers.$question->id");
+                $answer->save();
+            } else {
+                $answer =
+                    Answer::create([
+                        'submission_id' => $submissionId,
+                        'question_id' => $question->id,
+                        'selected_option_id' => $request->input("answers.$question->id"),
+                    ]);
+            }
             if ($request->input("answers.$question->id") == $question->options->first()->id) {
                 $score++;
             }

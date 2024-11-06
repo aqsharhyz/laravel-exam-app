@@ -19,6 +19,9 @@
                     <p class="mb-2">Score: ${data.submission.score || 0}</p>
                     ${data.exam.passing_grade >= 0 ? `<p class="mb-4">Passing Grade: ${data.exam.passing_grade}</p>` : ''}
                 `}
+                <p class="mb-4">Total Questions: ${data.questions.length}</p>
+                <p class="mb-4">Total Answered: ${data.submission.answers.length}</p>
+                
                 <p class="mb-4">Submitted: ${data.submission.updated_at}</p>
             `; //! total question
 

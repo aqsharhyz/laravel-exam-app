@@ -21,7 +21,7 @@ class LessonController extends Controller
         Gate::authorize('viewAny', Lesson::class);
 
         return view('lessons.showPublic', [
-            'lessons' => Lesson::all(),
+            'lessons' => Lesson::where('visibility', 'public')->get(),
         ]);
     }
 
@@ -103,7 +103,6 @@ class LessonController extends Controller
      */
     public function destroy($lessonId)
     {
-        //! soft delete
         $lesson = Lesson::findOrFail($lessonId);
         Gate::authorize('delete', $lesson);
         $lesson->delete();
