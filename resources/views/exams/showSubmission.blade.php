@@ -23,7 +23,7 @@
                 <p class="mb-4">Total Answered: ${data.submission.answers.length}</p>
                 
                 <p class="mb-4">Submitted: ${data.submission.updated_at}</p>
-            `; //! total question
+            `;
 
             const questions = data.questions.map(question => {
                 const userAnswer = data.submission.answers.find(answer => answer.question_id === question.id)?.selected_option_id;

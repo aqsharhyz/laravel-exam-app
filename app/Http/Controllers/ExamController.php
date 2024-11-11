@@ -163,17 +163,7 @@ class ExamController extends Controller implements HasMiddleware
         Gate::authorize('update', $exam);
         $validatedData = $request->validated();
 
-        //!
-        $exam->update([
-            'title' => $validatedData['title'],
-            'description' => $validatedData['description'],
-            'start_time' => $validatedData['start_time'],
-            'end_time' => $validatedData['end_time'],
-            'duration' => $validatedData['duration'],
-            'passing_grade' => $validatedData['passing_grade'],
-            'total_score' => $validatedData['total_score'],
-            'lesson_id' => $validatedData['lesson_id'],
-        ]);
+        $exam->update($request->safe()->except(['questions', 'options', 'correct_option']));
 
         $questions = Question::where('exam_id', $examId)->get();
         $options = Option::whereIn('question_id', $questions->pluck('id'))->get();

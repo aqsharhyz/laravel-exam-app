@@ -1,3 +1,4 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -34,7 +35,9 @@
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+                            <div>
+                                <img class="h-8 w-8 rounded-full" alt="{{ Auth::user()->name }}" source="{{ asset('storage/' . Auth::user()->profile_picture) }}" id="profilePicture" lastUpdated="{{ Auth::user()->updated_at }}">
+                            </div>
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -109,3 +112,31 @@
         </div>
     </div>
 </nav>
+<script>
+    function saveImageToLocalStorage(imageUrl, keyName) {
+        fetch(imageUrl)
+            .then(response => response.blob())
+            .then(blob => {
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    // Simpan string Base64 ke localStorage
+                    localStorage.setItem(keyName, reader.result);
+                    console.log('Image saved to localStorage');
+                };
+                reader.readAsDataURL(blob);
+            })
+            .catch(error => console.error('Error fetching or converting image:', error));
+    }
+
+    $(document).ready(function() {
+        const savedImage = localStorage.getItem('profilePicture');
+        const lastUpdatedProfilePicture = localStorage.getItem('lastUpdatedProfilePicture');
+        if (savedImage && lastUpdatedProfilePicture === $('#profilePicture').attr('lastUpdated')) {
+            $('#profilePicture').attr('src', savedImage).show(); // Show the uploaded image from local storage
+        } else {
+            $('#profilePicture').attr('src', $('#profilePicture').attr('source')).show();
+            saveImageToLocalStorage($('#profilePicture').attr('source'), 'profilePicture');
+            localStorage.setItem('lastUpdatedProfilePicture', $('#profilePicture').attr('lastUpdated'));
+        }
+    });
+</script>

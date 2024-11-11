@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -86,15 +87,31 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function uploadProfilePicture(Request $request): RedirectResponse
+    public function uploadProfilePicture(Request $request)
     {
         $request->validate([
-            'profile_picture' => ['required', 'image'],
+            'profile_picture' => 'required|image', //! mime and maxsize
         ]);
 
-        $request->user()->updateProfilePicture($request->file('profile_picture'));
+        if ($request->file()) {
+            $fileName = time() . '_' . $request->profile_picture->getClientOriginalName();
+            $filePath = $request->file('profile_picture')->storeAs('profile_pictures', $fileName, 'public');
 
-        return Redirect::route('profile.edit')->with('status', 'profile-picture-updated');
+            $user = $request->user();
+            //! remove old profile picture
+            // echo Storage::exists($user->profile_picture);
+            // echo json_encode(Storage::files('profile_pictures'));
+            // return;
+            // if (!empty($user->profile_picture) && Storage::exists($user->profile_picture)) {
+            //     Storage::delete($user->profile_picture);
+            // }
+            $user->profile_picture = $filePath;
+            $user->save();
+
+            return back()->with('status', 'profile-picture-uploaded');
+        }
+
+        return back()->with('status', 'profile-picture-upload-failed');
     }
 
     public function deleteProfilePicture(Request $request): RedirectResponse

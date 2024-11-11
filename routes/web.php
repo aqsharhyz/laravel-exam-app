@@ -20,6 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile/report', [ProfileController::class, 'reportData'])->name('profile.reportData');
+    Route::patch('/profile/picture', [ProfileController::class, 'uploadProfilePicture'])->name('profile.updatePicture');
 });
 
 Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->group(function () {
