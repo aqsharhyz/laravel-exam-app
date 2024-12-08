@@ -25,7 +25,7 @@ class ExamSeeder extends Seeder
             'name' => 'a',
             'email' => 'a@g.com',
             'email_verified_at' => now(),
-            'password' => Hash::make('password'),
+            'password' => Hash::make('s'),
             'remember_token' => Str::random(10),
             'role' => 'admin',
         ]);
