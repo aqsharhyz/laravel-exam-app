@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -27,8 +28,21 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->profile(EditProfile::class, isSimple: false)
+            ->databaseNotifications()
+            ->sidebarCollapsibleOnDesktop()
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            // ->globalSearchDebounce('750ms')
             ->colors([
-                'primary' => Color::Amber,
+                'danger' => Color::Red,
+                'gray' => Color::Slate,
+                'info' => Color::Blue,
+                'primary' => Color::Indigo,
+                'success' => Color::Emerald,
+                'warning' => Color::Orange,
+            ])
+            ->navigationGroups([
+                'User Management'
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

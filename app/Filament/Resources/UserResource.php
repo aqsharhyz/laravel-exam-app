@@ -55,20 +55,20 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable(),
-                    Tables\Columns\TextColumn::make('role')
+                Tables\Columns\TextColumn::make('role')
                     ->searchable(),
-                    Tables\Columns\ImageColumn::make('profile_picture')
-                        ->circular()
-                        ->url(fn (User $record) => $record->getFilamentAvatarUrl())
-                        ->label('Profile Picture'),
-                    Tables\Columns\TextColumn::make('created_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                    Tables\Columns\TextColumn::make('updated_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\ImageColumn::make('profile_picture')
+                    ->circular()
+                    // ->url(fn (User $record) => $record->getFilamentAvatarUrl())
+                    ->label('Profile Picture'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
