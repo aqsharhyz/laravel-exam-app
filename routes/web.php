@@ -23,9 +23,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile/picture', [ProfileController::class, 'uploadProfilePicture'])->name('profile.updatePicture');
 });
 
-Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->group(function () {
-    Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-});
+// Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->group(function () {
+//     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+// });
 
 Route::middleware('auth')->prefix('lessons')->group(function () {
     Route::get('/', [LessonController::class, 'showPublic'])->name('lessons.showPublic');
