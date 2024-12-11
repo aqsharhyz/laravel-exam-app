@@ -25,7 +25,7 @@ class Exam extends Model
         'passing_grade',
     ];
 
-    public function lessons()
+    public function lesson()
     {
         return $this->belongsTo(Lesson::class);
     }
