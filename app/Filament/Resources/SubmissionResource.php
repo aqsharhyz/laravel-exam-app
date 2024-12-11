@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\QuestionResource\Pages;
-use App\Filament\Resources\QuestionResource\RelationManagers;
-use App\Models\Question;
+use App\Filament\Resources\SubmissionResource\Pages;
+use App\Filament\Resources\SubmissionResource\RelationManagers;
+use App\Models\Submission;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,28 +13,32 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class QuestionResource extends Resource
+class SubmissionResource extends Resource
 {
-    protected static ?string $model = Question::class;
+    protected static ?string $model = Submission::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard';
 
-    protected static ?string $navigationLabel = 'Exam Questions';
+    protected static ?string $navigationLabel = 'Submission';
 
-    protected static ?string $modelLabel = 'Question';
+    protected static ?string $modelLabel = 'Submission';
 
     protected static ?string $navigationGroup = 'Lesson Management';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Textarea::make('question_text')
-                    ->required()
-                    ->columnSpanFull(),
+                Forms\Components\TextInput::make('score')
+                    ->numeric(),
+                Forms\Components\Toggle::make('is_submitted')
+                    ->required(),
                 Forms\Components\TextInput::make('exam_id')
+                    ->required()
+                    ->numeric(),
+                Forms\Components\TextInput::make('enroll_id')
                     ->required()
                     ->numeric(),
             ]);
@@ -44,7 +48,15 @@ class QuestionResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('enroll_id')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('exam_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\IconColumn::make('is_submitted')
+                    ->boolean(),
+                Tables\Columns\TextColumn::make('score')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('deleted_at')
@@ -64,6 +76,7 @@ class QuestionResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -85,9 +98,10 @@ class QuestionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListQuestions::route('/'),
-            'create' => Pages\CreateQuestion::route('/create'),
-            'edit' => Pages\EditQuestion::route('/{record}/edit'),
+            'index' => Pages\ListSubmissions::route('/'),
+            'create' => Pages\CreateSubmission::route('/create'),
+            'view' => Pages\ViewSubmission::route('/{record}'),
+            'edit' => Pages\EditSubmission::route('/{record}/edit'),
         ];
     }
 

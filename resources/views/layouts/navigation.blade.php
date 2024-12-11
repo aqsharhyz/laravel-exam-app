@@ -22,11 +22,11 @@
                     <x-nav-link :href="route('lessons.showActive')" :active="request()->routeIs('lessons.showActive')">
                         {{ __('My Lessons') }}
                     </x-nav-link>
-                    @if(Auth::user()->role === 'admin')
+                    {{-- @if(Auth::user()->role === 'admin')
                     <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                         {{ __('Admin') }}
                     </x-nav-link>
-                    @endif
+                    @endif --}}
                 </div>
             </div>
 
