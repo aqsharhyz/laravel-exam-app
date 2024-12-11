@@ -15,7 +15,7 @@ class Answer extends Model
 
     protected $fillable = ['question_id', 'submission_id', 'selected_option_id'];
 
-    public function questions()
+    public function question()
     {
         return $this->belongsTo(Question::class);
     }
