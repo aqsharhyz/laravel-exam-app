@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('lessons', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
             $table->string('title');
             $table->text('description');
             $table->boolean('is_active')->default(true);
             $table->enum('visibility', ['public', 'private'])->default('public');
             $table->unique(['title']);
+            $table->softDeletes();
+            $table->timestamps();
         });
     }
 

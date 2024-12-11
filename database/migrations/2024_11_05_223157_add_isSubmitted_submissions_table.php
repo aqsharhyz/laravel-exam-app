@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('submissions', function (Blueprint $table) {
-            $table->boolean('is_submitted')->default(false);
+            $table->boolean('is_submitted')->default(false)->after('score');
         });
     }
 

@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('exams', function (Blueprint $table) {
-            $table->boolean('hide_score')->default(false);
-            $table->boolean('hide_correct_answers')->default(false);
+            $table->boolean('hide_score')->default(false)->after('total_score');
+            $table->boolean('hide_correct_answers')->default(false)->after('hide_score');
             $table->integer('passing_grade')->default(-1)->change();
-            $table->boolean('multiple_attempts')->default(false);
+            $table->boolean('multiple_attempts')->default(false)->after('hide_correct_answers');
             // $table->boolean('randomize_questions')->default(false);
         });
     }
