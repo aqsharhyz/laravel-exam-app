@@ -8,9 +8,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Exam;
 use App\Models\Enroll;
 use App\Models\Answer;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Submission extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['exam_id', 'enroll_id', 'score'];
 
     public function exams()

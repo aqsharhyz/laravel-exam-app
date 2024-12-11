@@ -17,10 +17,10 @@ class LessonFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'title' => $this->faker->sentence(),
+            'description' => $this->faker->randomHtml(),
             'visibility' => $this->faker->randomElement(['public', 'private']),
-            'is_active' => $this->faker->boolean,
+            'is_active' => $this->faker->boolean(),
         ];
     }
 }

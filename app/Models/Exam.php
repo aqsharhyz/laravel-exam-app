@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Submission;
 use App\Models\Lesson;
 use App\Models\Question;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Exam extends Model
 {
+    use SoftDeletes;
 
     protected $fillable = [
         'lesson_id',

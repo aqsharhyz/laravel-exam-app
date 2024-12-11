@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Question;
 use App\Models\Submission;
 use App\Models\Option;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Answer extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['question_id', 'submission_id', 'selected_option_id'];
 
     public function questions()
