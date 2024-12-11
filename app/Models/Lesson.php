@@ -9,7 +9,7 @@ use App\Models\Enroll;
 
 class Lesson extends Model
 {
-    protected $fillable = ['title', 'description'];
+    protected $fillable = ['title', 'description', 'is_active', 'visibility'];
 
     public function exams()
     {
