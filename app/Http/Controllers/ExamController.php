@@ -18,24 +18,24 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 
-class ExamController extends Controller implements HasMiddleware
+class ExamController extends Controller //implements HasMiddleware
 {
 
-    public static function middleware(): array
-    {
-        return [
-            'auth',
-            new Middleware(CheckLessonEnrollmentMiddleware::class, except: ['create', 'store', 'edit', 'update', 'destroy'])
-            //!
-        ];
-    }
+    // public static function middleware(): array
+    // {
+    //     return [
+    //         'auth',
+    //         new Middleware(CheckLessonEnrollmentMiddleware::class, except: ['create', 'store', 'edit', 'update', 'destroy'])
+    //         //!
+    //     ];
+    // }
 
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request, $lessonId): View
     {
-        Gate::authorize('viewAny', Exam::where('lesson_id', $lessonId)->first());
+        // Gate::authorize('viewAny', Exam::where('lesson_id', $lessonId)->first());
         $exams = Exam::where('lesson_id', $lessonId)->get();
         return view('exams.index', [
             'lessonId' => $lessonId,

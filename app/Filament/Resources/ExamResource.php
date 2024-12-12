@@ -83,21 +83,21 @@ class ExamResource extends Resource
                             ->maxLength(255),
                     ]),
 
-                // Forms\Components\Repeater::make('Options')
-                //     ->label('Options')
-                //     // ->recordComponent(Forms\Components\Option::class)
-                //     ->addActionLabel('Add Option')
-                //     ->minItems(2)
-                //     ->maxItems(10)
-                //     ->relationship('questions.options')
-                //     ->columnSpanFull()
-                //     ->schema([
-                //         Forms\Components\TextInput::make('option_text')
-                //             ->required()
-                //             ->maxLength(255),
-                //         Forms\Components\Toggle::make('is_correct')
-                //             ->required(),
-                //     ]),
+                Forms\Components\Repeater::make('Options')
+                    ->label('Options')
+                    // ->recordComponent(Forms\Components\Option::class)
+                    ->addActionLabel('Add Option')
+                    ->minItems(2)
+                    ->maxItems(10)
+                    ->relationship('options')
+                    ->columnSpanFull()
+                    ->schema([
+                        Forms\Components\TextInput::make('option_text')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\Toggle::make('is_correct')
+                            ->required(),
+                    ]),
             ]);
     }
 

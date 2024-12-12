@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Exam;
 use App\Models\Enroll;
 use App\Models\Answer;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Submission extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasFactory;
 
     protected $fillable = ['exam_id', 'enroll_id', 'score'];
 
@@ -21,7 +22,7 @@ class Submission extends Model
         return $this->belongsTo(Exam::class);
     }
 
-    public function enrolls()
+    public function enroll()
     {
         return $this->belongsTo(Enroll::class);
     }

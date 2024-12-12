@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Submission;
 use App\Models\Lesson;
 use App\Models\Question;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Exam extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasFactory;
 
     protected $fillable = [
         'lesson_id',
@@ -38,5 +39,11 @@ class Exam extends Model
     public function questions()
     {
         return $this->hasMany(Question::class);
+    }
+
+    public function options()
+    {
+        return $this->hasManyThrough(Option::class, Question::class);
+        // return $this->hasMany(Option::class);
     }
 }

@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Submission>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Question>
  */
-class SubmissionFactory extends Factory
+class QuestionFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -18,9 +18,7 @@ class SubmissionFactory extends Factory
     {
         return [
             'exam_id' => \App\Models\Exam::factory(),
-            'enroll_id' => \App\Models\Enroll::factory(),
-            'score' => $this->faker->numberBetween(0, 100),
-            'is_submitted' => $this->faker->boolean(),
+            'question_text' => $this->faker->sentence(),
         ];
     }
 }

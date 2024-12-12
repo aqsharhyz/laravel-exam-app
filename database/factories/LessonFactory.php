@@ -18,7 +18,7 @@ class LessonFactory extends Factory
     {
         return [
             'title' => $this->faker->sentence(),
-            'description' => $this->faker->randomHtml(),
+            'description' => $this->faker->paragraph(),
             'visibility' => $this->faker->randomElement(['public', 'private']),
             'is_active' => $this->faker->boolean(),
         ];

@@ -5,6 +5,7 @@ use App\Http\Controllers\LessonController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EnrollController;
+use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +22,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile/report', [ProfileController::class, 'reportData'])->name('profile.reportData');
     Route::patch('/profile/picture', [ProfileController::class, 'uploadProfilePicture'])->name('profile.updatePicture');
+
+    Route::get('/exam-leaderboard/{exam_id}', [LeaderboardController::class, 'examLeaderboard'])->name('examLeaderboard');
+    Route::get('/lesson-leaderboard/{lesson_id}', [LeaderboardController::class, 'lessonLeaderboard'])->name('lessonLeaderboard');
 });
 
 // Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->group(function () {

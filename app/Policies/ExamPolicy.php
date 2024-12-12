@@ -26,7 +26,7 @@ class ExamPolicy
      */
     public function viewAny(User $user, Exam $exam): bool
     {
-        return Enroll::where('user_id', $user->id)->where('lesson_id', $exam->lesson_id)->exists();
+        return true; //Enroll::where('user_id', $user->id)->where('lesson_id', $exam->lesson_id)->exists();
     }
 
     /**

@@ -21,9 +21,17 @@ describe('LessonTest', function () {
             $response->assertStatus(200);
         });
 
-        test('an unauthenticated user can view public lessons')->todo();
+        test('an unauthenticated user can view public lessons', function () {
+            $response = $this->get(route('lessons.showPublic'));
 
-        test('a guest cannot view public lessons')->todo();
+            $response->assertStatus(200);
+        });
+
+        test('a guest can view public lessons', function () {
+            $response = $this->get(route('lessons.showPublic'));
+
+            $response->assertStatus(200);
+        });
     });
 
     describe('lessons.showActive', function () {
