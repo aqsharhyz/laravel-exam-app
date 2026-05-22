@@ -16,6 +16,7 @@ return new class extends Migration
             $table->boolean('hide_correct_answers')->default(false)->after('hide_score');
             $table->integer('passing_grade')->default(-1)->change();
             $table->boolean('multiple_attempts')->default(false)->after('hide_correct_answers');
+            $table->boolean('force_complete')->default(false)->after('multiple_attempts');
             // $table->boolean('randomize_questions')->default(false);
         });
     }

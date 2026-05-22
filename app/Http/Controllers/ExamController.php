@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Middleware\CheckLessonEnrollmentMiddleware;
 use App\Http\Requests\ExamRequest;
+use App\MakeExamCacheTrait;
 use App\Models\Enroll;
 use App\Models\Exam;
 use App\Models\Question;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Gate;
 
 class ExamController extends Controller //implements HasMiddleware
 {
+    use MakeExamCacheTrait;
 
     // public static function middleware(): array
     // {
@@ -205,17 +207,5 @@ class ExamController extends Controller //implements HasMiddleware
         Gate::authorize('delete', $exam);
         $exam->delete();
         return redirect()->route('exams.index', ['lessonId' => $exam->lesson_id]);
-    }
-
-    function makeExamCache(Exam $exam)
-    {
-        $question = Question::with(['options' => function ($query) {
-            $query->select('id', 'question_id', 'option_text');
-        }])
-            ->where('exam_id', $exam->id)
-            ->select('id', 'question_text')
-            ->get();
-
-        Cache::put('exam_' . $exam->id, ['exam' => $exam, 'questions' => $question]);
     }
 }

@@ -94,6 +94,17 @@
                 });
             });
 
+            $(document).on("visibilitychange", function() {
+                if (document.hidden) {
+                    $('#modalTitle').text('Warning!');
+                    $('#modalMessage').text('Do not leave the page. Any violation will result in a zero score.');
+                    $('#warningModal').css('display', 'flex'); // Show modal
+                    console.error('Error:', error);
+                } else {
+                    // user is back   
+                }
+            });
+
             // Close the modal when the user clicks the close button
             $('#closeModal').on('click', function() {
                 $('#warningModal').css('display', 'none'); // Hide modal

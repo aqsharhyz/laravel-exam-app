@@ -14,6 +14,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use App\Http\Middleware\CheckLessonEnrollmentMiddleware;
 use App\Jobs\SubmitSubmissionJob;
+use App\MakeExamCacheTrait;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -21,6 +22,8 @@ use Illuminate\View\View;
 
 class SubmissionController extends Controller implements HasMiddleware
 {
+    use MakeExamCacheTrait;
+
     public static function middleware(): array
     {
         return [
@@ -81,14 +84,8 @@ class SubmissionController extends Controller implements HasMiddleware
         } else {
             $exam = Exam::findOrFail($examId);
             $duration = $exam->duration;
-            $questions = Question::with(['options' => function ($query) {
-                $query->select('id', 'question_id', 'option_text');
-            }])
-                ->where('exam_id', $examId)
-                ->select('id', 'question_text')
-                ->get();
-
-            Cache::put('exam_' . $examId, ['exam' => $exam, 'questions' => $questions]);
+            $this->makeExamCache($exam);
+            $exam = Cache::get('exam_' . $examId);
         }
 
         if ($submission) {

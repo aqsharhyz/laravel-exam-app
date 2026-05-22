@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('answers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('question_id')->constrained(table: 'questions', column: 'id')->onDelete('cascade');
-            $table->foreignId('submission_id')->constrained(table: 'submissions', column: 'id')->onDelete('cascade');
-            $table->foreignId('selected_option_id')->constrained(table: 'options', column: 'id')->onDelete('cascade');
+            $table->foreignId('question_id')->constrained()->onDelete('cascade');
+            $table->foreignId('submission_id')->constrained()->onDelete('cascade');
+            $table->foreignId('selected_option_id')->constrained()->onDelete('cascade');
             $table->softDeletes();
             $table->timestamps();
         });

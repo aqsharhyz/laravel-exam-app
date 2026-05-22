@@ -60,6 +60,7 @@ class LeaderboardController extends Controller
 
         $leaderboard = [
             'leaderboard' => $leaderboard,
+            'max_score' => Exam::find($exam_id)->total_score,
             'last_updated' => now()->toDateTimeString(),
             'message' => 'Updated every 15 minutes',
         ];
@@ -86,6 +87,7 @@ class LeaderboardController extends Controller
 
         $leaderboard = [
             'leaderboard' => $leaderboard->sortByDesc('score')->values(),
+            'max_score' => Lesson::find($lesson_id)->exams->sum('total_score'),
             'last_updated' => now()->toDateTimeString(),
             'message' => 'Updated every hour',
         ];

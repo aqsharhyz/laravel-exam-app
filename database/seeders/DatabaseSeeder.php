@@ -11,6 +11,8 @@ use App\Models\Submission;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,9 +26,18 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        $this->call([
-            ExamSeeder::class,
+        User::create([
+            'name' => 'Super Admin',
+            'email' => 'a@g.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('s'),
+            'remember_token' => Str::random(10),
+            'role' => 'admin',
         ]);
+
+        // $this->call([
+        //     ExamSeeder::class,
+        // ]);
 
         // User::factory(10)->create();
         for ($i = 0; $i < 2; $i++) {
@@ -44,9 +55,11 @@ class DatabaseSeeder extends Seeder
                 ]);
 
                 foreach ($enrolls as $enroll) {
+                    $score = rand(0, $exam->total_score);
                     Submission::factory()->create([
                         'exam_id' => $exam->id,
                         'is_submitted' => true,
+                        'score' => $score,
                         'enroll_id' => $enroll->id,
                     ]);
                 }
@@ -61,6 +74,7 @@ class DatabaseSeeder extends Seeder
                     ]);
                     Option::factory()->create([
                         'question_id' => $question->id,
+                        'option_text' => 'Correct Option',
                         'is_correct' => true,
                     ]);
                 }
